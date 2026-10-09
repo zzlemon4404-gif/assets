@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>我的资产</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2B1A52">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#F1EDF9; --ink:#241A3D; --muted:#7A6F93; --card:#FFFFFF; --line:#E1D9F2;
+  --top:#2B1A52; --top-text:#F6F2FF; --top-soft:#BDAEE6;
+  --violet:#6C4BC1; --lilac:#DCD2F3; --gold:#E3B341; --danger:#C0392B;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#140E24;--ink:#EEE9FA;--muted:#9D92B8;--card:#1F1636;--line:#33284F;--top:#3A2570;--lilac:#3A2E5C;--violet:#9B80F0}
+}
+:root[data-theme="dark"]{--bg:#140E24;--ink:#EEE9FA;--muted:#9D92B8;--card:#1F1636;--line:#33284F;--top:#3A2570;--lilac:#3A2E5C;--violet:#9B80F0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+main{max-width:480px;margin:0 auto;padding:18px 16px 48px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+h1{font-size:20px;margin:0;font-weight:700}
+.eye{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:7px 13px;font-size:13px}
+
+/* 总资产 */
+.top{background:var(--top);color:var(--top-text);border-radius:22px;padding:20px 20px 16px;margin-bottom:22px}
+.top .lab{font-size:13px;color:var(--top-soft)}
+.top .main-n{font-size:28px;font-weight:700;margin:4px 0 2px;font-variant-numeric:tabular-nums;word-break:break-all}
+.top .sub-n{font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--top-soft)}
+.top small{font-size:.65em;margin-right:3px;font-weight:500}
+.two{display:flex;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.16)}
+.two div{flex:1}
+.two b{display:block;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;word-break:break-all}
+.rate{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12px;color:var(--top-soft)}
+.rate button{border:1px solid rgba(255,255,255,.35);background:transparent;border-radius:12px;padding:4px 10px;font-size:12px;color:var(--top-text)}
+
+/* 分类 */
+.sec{margin-bottom:24px}
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;margin:0 4px 10px}
+.sec-h h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+.mark{width:9px;height:18px;border-radius:3px;background:var(--violet)}
+.sec.fund .mark{background:var(--gold)}
+.sec-sum{text-align:right;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.5}
+.list{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.item{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border:0;background:none;text-align:left;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.thumb{width:44px;height:44px;border-radius:12px;background:var(--lilac);color:var(--violet);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex:none;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.info{flex:1;min-width:0}
+.info .n{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info .t{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.amt{text-align:right;flex:none;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.amt i{display:block;font-style:normal;font-size:11px;color:var(--muted);font-weight:400;margin-top:1px}
+.empty{padding:22px;text-align:center;color:var(--muted);font-size:13px}
+.add{width:100%;margin-top:10px;padding:13px;border-radius:14px;border:1.5px dashed var(--violet);background:transparent;color:var(--violet);font-size:14px;font-weight:600}
+
+/* 弹层 */
+.mask{position:fixed;inset:0;background:rgba(20,10,40,.55);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.mask.on{display:flex}
+.sheet{background:var(--card);color:var(--ink);width:100%;max-width:480px;max-height:92%;overflow-y:auto;
+  border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet h3{margin:0 0 14px;font-size:17px}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.f input[type=text],.f input[type=number]{width:100%;font-size:16px;padding:11px 12px;border-radius:12px;
+  border:1.5px solid var(--line);background:transparent;color:var(--ink)}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{flex:1;padding:10px;border:0;background:transparent;font-size:15px}
+.seg button.on{background:var(--violet);color:#fff;font-weight:600}
+.imgrow{display:flex;align-items:center;gap:12px}
+.imgrow .thumb{width:56px;height:56px}
+.imgrow button{border:1.5px solid var(--line);background:transparent;border-radius:10px;padding:8px 12px;font-size:13px}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btns button{flex:1;padding:13px;border-radius:12px;font-size:15px;border:1.5px solid var(--line);background:transparent}
+.btns .ok{background:var(--violet);border-color:var(--violet);color:#fff;font-weight:600}
+.btns .del{color:var(--danger);border-color:var(--danger);flex:0 0 auto;padding:13px 16px}
+.note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>我的资产</h1>
+    <button class="eye" id="eye">隐藏金额</button>
+  </header>
+
+  <section class="top">
+    <div class="lab">总资产(折合人民币)</div>
+    <div class="main-n" id="tCNY"></div>
+    <div class="lab" style="margin-top:8px">折合港币</div>
+    <div class="sub-n" id="tHKD"></div>
+    <div class="two">
+      <div><span class="lab">港币资产</span><b id="rawHKD"></b></div>
+      <div><span class="lab">人民币资产</span><b id="rawCNY"></b></div>
+    </div>
+    <div class="rate"><span id="rateTxt"></span><button id="rateBtn">改汇率</button></div>
+  </section>
+
+  <section class="sec" id="sec-deposit">
+    <div class="sec-h">
+      <h2><span class="mark"></span>存款账户</h2>
+      <div class="sec-sum" id="sum-deposit"></div>
+    </div>
+    <div class="list" id="list-deposit"></div>
+    <button class="add" data-add="deposit">+ 添加存款账户</button>
+  </section>
+
+  <section class="sec fund" id="sec-fund">
+    <div class="sec-h">
+      <h2><span class="mark"></span>基金账户</h2>
+      <div class="sec-sum" id="sum-fund"></div>
+    </div>
+    <div class="list" id="list-fund"></div>
+    <button class="add" data-add="fund">+ 添加基金账户</button>
+  </section>
+</main>
+
+<!-- 账户编辑 -->
+<div class="mask" id="mask">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+    <h3 id="sTitle"></h3>
+    <div class="f"><label for="fName">名称(如:招商银行卡、支付宝)</label><input type="text" id="fName" maxlength="30"></div>
+    <div class="f"><label>币种</label>
+      <div class="seg"><button type="button" data-c="HKD">港币</button><button type="button" data-c="CNY">人民币</button></div>
+    </div>
+    <div class="f"><label for="fAmt">金额</label><input type="number" id="fAmt" inputmode="decimal" min="0" step="0.01"></div>
+    <div class="f"><label for="fNote">备注(自定义文字)</label><input type="text" id="fNote" maxlength="60"></div>
+    <div class="f"><label>图片</label>
+      <div class="imgrow">
+        <div class="thumb" id="fThumb"></div>
+        <button type="button" id="pick">选择图片</button>
+        <button type="button" id="rmImg">移除</button>
+        <input type="file" id="file" accept="image/*" hidden>
+      </div>
+    </div>
+    <div class="btns">
+      <button type="button" class="del" id="delBtn">删除</button>
+      <button type="button" id="cancel">取消</button>
+      <button type="button" class="ok" id="save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 汇率 -->
+<div class="mask" id="mask2">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+    <h3 id="rTitle">设置汇率</h3>
+    <div class="f"><label for="fRate">1 港币 = ? 人民币</label><input type="number" id="fRate" inputmode="decimal" step="0.0001" min="0"></div>
+    <div class="note" id="rateNote"></div>
+    <div class="note">网页无法自动联网取汇率,需要时在这里手动更新。默认值参考2026年8月下旬的行情。</div>
+    <div class="btns">
+      <button type="button" id="rCancel">取消</button>
+      <button type="button" class="ok" id="rSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var DEFAULT_RATE = 0.857;
+var SYM = {HKD:"HK$", CNY:"¥"};
+var state = {
+  rate: DEFAULT_RATE,
+  hidden: false,
+  accounts: [
+    {id:"a1", type:"deposit", name:"示例银行卡", cur:"CNY", amount:50000, note:"工资卡", img:""},
+    {id:"a2", type:"deposit", name:"示例港币账户", cur:"HKD", amount:30000, note:"香港银行", img:""},
+    {id:"a3", type:"fund", name:"示例基金账户", cur:"CNY", amount:80000, note:"指数基金", img:""}
+  ]
+};
+try{
+  var raw = localStorage.getItem("assets-v2");
+  if(raw){ var p = JSON.parse(raw); if(p && p.accounts){ state = p; if(!state.rate) state.rate = DEFAULT_RATE; } }
+}catch(e){}
+function persist(){
+  try{ localStorage.setItem("assets-v2", JSON.stringify(state)); }
+  catch(e){ alert("保存失败:存储空间不足,请移除一些图片。"); }
+}
+function fmt(n){ return Number(n).toLocaleString("zh-CN",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function money(cur, n){ return state.hidden ? SYM[cur]+" ••••" : SYM[cur]+" "+fmt(n); }
+function $(id){ return document.getElementById(id); }
+
+function sums(list){
+  var h=0, c=0;
+  list.forEach(function(a){ if(a.cur==="HKD") h+=a.amount; else c+=a.amount; });
+  return {HKD:h, CNY:c};
+}
+
+function render(){
+  var all = sums(state.accounts);
+  var totalCNY = all.CNY + all.HKD*state.rate;
+  var totalHKD = all.HKD + all.CNY/state.rate;
+  $("tCNY").textContent = money("CNY", totalCNY);
+  $("tHKD").textContent = money("HKD", totalHKD);
+  $("rawHKD").textContent = money("HKD", all.HKD);
+  $("rawCNY").textContent = money("CNY", all.CNY);
+  $("rateTxt").textContent = "汇率 1港币 = "+state.rate+" 人民币";
+  $("eye").textContent = state.hidden ? "显示金额" : "隐藏金额";
+
+  ["deposit","fund"].forEach(function(type){
+    var items = state.accounts.filter(function(a){ return a.type===type; });
+    var s = sums(items);
+    $("sum-"+type).innerHTML = "";
+    var l1 = document.createElement("div"); l1.textContent = money("HKD", s.HKD);
+    var l2 = document.createElement("div"); l2.textContent = money("CNY", s.CNY);
+    $("sum-"+type).appendChild(l1); $("sum-"+type).appendChild(l2);
+
+    var box = $("list-"+type); box.innerHTML = "";
+    if(!items.length){
+      var e = document.createElement("div"); e.className="empty";
+      e.textContent = "还没有账户,点下方按钮添加";
+      box.appendChild(e); return;
+    }
+    items.forEach(function(a){
+      var b = document.createElement("button"); b.className="item"; b.type="button";
+      var th = document.createElement("div"); th.className="thumb";
+      if(a.img){ var im = document.createElement("img"); im.src=a.img; im.alt=""; th.appendChild(im); }
+      else th.textContent = (a.name||"?").charAt(0);
+      var info = document.createElement("div"); info.className="info";
+      var n = document.createElement("div"); n.className="n"; n.textContent = a.name;
+      var t = document.createElement("div"); t.className="t"; t.textContent = a.note || " ";
+      info.appendChild(n); info.appendChild(t);
+      var am = document.createElement("div"); am.className="amt";
+      am.textContent = state.hidden ? "••••" : fmt(a.amount);
+      var cu = document.createElement("i"); cu.textContent = a.cur==="HKD" ? "港币" : "人民币";
+      am.appendChild(cu);
+      b.appendChild(th); b.appendChild(info); b.appendChild(am);
+      b.onclick = function(){ openSheet(a.type, a.id); };
+      box.appendChild(b);
+    });
+  });
+}
+
+/* 编辑弹层 */
+var editing = null, form = {cur:"CNY", img:"", type:"deposit"};
+function setCur(c){
+  form.cur = c;
+  Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function(b){
+    b.classList.toggle("on", b.getAttribute("data-c")===c);
+  });
+}
+function paintThumb(){
+  var t = $("fThumb"); t.innerHTML = "";
+  if(form.img){ var im = document.createElement("img"); im.src=form.img; im.alt=""; t.appendChild(im); }
+  else t.textContent = ($("fName").value||"图").charAt(0);
+}
+function openSheet(type, id){
+  form.type = type;
+  var a = id ? state.accounts.filter(function(x){return x.id===id;})[0] : null;
+  editing = a ? a.id : null;
+  $("sTitle").textContent = (a ? "编辑" : "添加") + (type==="deposit" ? "存款账户" : "基金账户");
+  $("fName").value = a ? a.name : "";
+  $("fAmt").value = a ? a.amount : "";
+  $("fNote").value = a ? a.note : "";
+  form.img = a ? a.img : "";
+  setCur(a ? a.cur : "CNY");
+  $("delBtn").style.display = a ? "" : "none";
+  paintThumb();
+  $("mask").classList.add("on");
+}
+function closeSheet(){ $("mask").classList.remove("on"); }
+
+Array.prototype.forEach.call(document.querySelectorAll(".seg button"), function(b){
+  b.onclick = function(){ setCur(b.getAttribute("data-c")); };
+});
+Array.prototype.forEach.call(document.querySelectorAll("[data-add]"), function(b){
+  b.onclick = function(){ openSheet(b.getAttribute("data-add"), null); };
+});
+$("fName").oninput = function(){ if(!form.img) paintThumb(); };
+$("pick").onclick = function(){ $("file").click(); };
+$("rmImg").onclick = function(){ form.img = ""; paintThumb(); };
+$("file").onchange = function(){
+  var f = this.files && this.files[0]; if(!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    var im = new Image();
+    im.onload = function(){
+      var S = 160, c = document.createElement("canvas"); c.width = S; c.height = S;
+      var m = Math.min(im.width, im.height), sx = (im.width-m)/2, sy = (im.height-m)/2;
+      c.getContext("2d").drawImage(im, sx, sy, m, m, 0, 0, S, S);
+      form.img = c.toDataURL("image/jpeg", 0.75);
+      paintThumb();
+    };
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+  this.value = "";
+};
+$("cancel").onclick = closeSheet;
+$("mask").onclick = function(e){ if(e.target===$("mask")) closeSheet(); };
+$("save").onclick = function(){
+  var name = $("fName").value.trim();
+  if(!name){ $("fName").focus(); return; }
+  var amt = parseFloat($("fAmt").value); if(isNaN(amt)||amt<0) amt = 0;
+  var rec = {type:form.type, name:name, cur:form.cur, amount:amt, note:$("fNote").value.trim(), img:form.img};
+  if(editing){
+    state.accounts = state.accounts.map(function(a){ return a.id===editing ? Object.assign({id:a.id}, rec) : a; });
+  } else {
+    rec.id = "a"+Date.now(); state.accounts.push(rec);
+  }
+  persist(); render(); closeSheet();
+};
+$("delBtn").onclick = function(){
+  if(!confirm("确定删除这个账户?")) return;
+  state.accounts = state.accounts.filter(function(a){ return a.id!==editing; });
+  persist(); render(); closeSheet();
+};
+
+/* 汇率 */
+function rateNote(){
+  var r = parseFloat($("fRate").value);
+  $("rateNote").textContent = r>0 ? "1 人民币 ≈ "+(1/r).toFixed(4)+" 港币" : "";
+}
+$("fRate").oninput = rateNote;
+$("rateBtn").onclick = function(){ $("fRate").value = state.rate; rateNote(); $("mask2").classList.add("on"); };
+$("rCancel").onclick = function(){ $("mask2").classList.remove("on"); };
+$("mask2").onclick = function(e){ if(e.target===$("mask2")) $("mask2").classList.remove("on"); };
+$("rSave").onclick = function(){
+  var r = parseFloat($("fRate").value);
+  if(!(r>0)) return;
+  state.rate = r; persist(); render(); $("mask2").classList.remove("on");
+};
+
+$("eye").onclick = function(){ state.hidden = !state.hidden; persist(); render(); };
+render();
+if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+</script>
+</body>
+</html>
